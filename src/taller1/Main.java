@@ -46,8 +46,111 @@ public class Main {
             System.out.println("7) Salir");
             System.out.print("Ingrese opcion: ");
             
-            salir = true;
-		}
+            String input = sc.nextLine();
+            int opcion = -1;
+            
+            try {
+                
+                opcion = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                
+            }
+
+            
+            switch (opcion) {
+                case 1:
+                    cargarArchivos();
+                    break;
+                case 2:
+                    procesarSolicitudes();
+                    break;
+                case 3:
+                    inscripcionManual(sc);
+                    break;
+                case 4:
+                    administracionCurso(sc);
+                    break;
+                case 5:
+                    generarReportes();
+                    break;
+                case 6:
+                    analisisEstadistico();
+                    break;
+                case 7:
+                    salir = true;
+                    System.out.println("Saliendo del sistema...");
+                    break;
+                default:
+                    
+                    System.out.println("[Error] Opcion invalida. Por favor, ingrese un numero del 1 al 7.");
+            }
+        }
+		
+	}
+
+
+
+
+
+
+
+	private static void analisisEstadistico() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
+
+
+
+	private static void generarReportes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
+
+
+
+	private static void administracionCurso(Scanner sc) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
+
+
+
+	private static void inscripcionManual(Scanner sc) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
+
+
+
+	private static void procesarSolicitudes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
+
+
+
+	private static void cargarArchivos() {
+		// TODO Auto-generated method stub
 		
 	}
 
