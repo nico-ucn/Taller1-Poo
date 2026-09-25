@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Scanner;
+import java.io.File;
 
 
 public class Main {
@@ -18,14 +19,20 @@ public class Main {
 	static int cantAlumnos = 0;
 	
 	
-	
-	
 	static String[] nombreSolicitudes = new String[100];
 	static String[] apellidoSolicitudes = new String[100];
 	static int cantSolicitudes = 0;
 	
 	
-	
+	static String[] nAdmitidos = new String[100];
+    static String[] apAdmitidos = new String[100];
+    static String[] rutAdmitidos = new String[100];
+    static String[] parAdmitidos = new String[100];
+    static int cantAdmitidos = 0;
+    
+    
+    static String[] lineaRechazados = new String[100];
+    static int cantRechazados = 0;
 	
 	
 	
@@ -94,7 +101,80 @@ public class Main {
 
 
 
-	private static void analisisEstadistico() {
+	public static void analisisEstadistico() {
+        int totalIntentos = cantAdmitidos + cantRechazados;
+        
+        if (totalIntentos == 0) {
+            System.out.println("No hay datos suficientes para analizar.");
+            return;
+        }
+
+        System.out.println("\n--- Analisis estadistico ---");
+        System.out.println("Total de intentos procesados: " + totalIntentos);
+        
+        
+        double pctRechazo = ((double) cantRechazados / totalIntentos) * 100;
+       
+        pctRechazo = Math.round(pctRechazo * 10.0) / 10.0; 
+        
+        System.out.println("Rechazados: " + cantRechazados + " (" + pctRechazo + "%)");
+
+        int c1 = 0;
+        int c2 = 0;
+        for (int i = 0; i < cantAdmitidos; i++) {
+            if (parAdmitidos[i].equalsIgnoreCase("C1")) {
+                c1++;
+            } else if (parAdmitidos[i].equalsIgnoreCase("C2")) {
+                c2++;
+            }
+        }
+        System.out.println("Admitidos por paralelo -> C1: " + c1 + " | C2: " + c2);
+        
+        double tasaAdmision = ((double) cantAdmitidos / totalIntentos) * 100;
+        tasaAdmision = Math.round(tasaAdmision * 10.0) / 10.0;
+        
+        System.out.println("Tasa de admision: " + tasaAdmision + "%");
+    }
+
+
+
+
+
+
+
+	public static void generarReportes() {
+        
+    }
+
+
+
+
+
+
+
+	public static void administracionCurso(Scanner sc) {
+        System.out.println("--- Administracion del curso ---");
+        System.out.println("1) Cambiar paralelo de un alumno");
+        System.out.println("2) Eliminar alumno del curso");
+        System.out.println("3) Inscribir alumno nuevo");
+        System.out.println("4) Volver");
+        System.out.print("Ingrese opcion: ");
+        
+        String opcion = sc.nextLine();
+        
+        // a
+        
+        
+        guardarAlumnosTxt();
+    }
+
+
+
+
+
+
+
+	private static void guardarAlumnosTxt() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -105,10 +185,48 @@ public class Main {
 
 
 
-	private static void generarReportes() {
-		// TODO Auto-generated method stub
-		
-	}
+	public static void inscripcionManual(Scanner sc) {
+        System.out.println("\nComo desea inscribir a la persona?");
+        System.out.println("1) Por nombre completo");
+        System.out.println("2) Por RUT");
+        System.out.print("Ingrese opcion: ");
+        String op = sc.nextLine();
+
+        if (op.equals("2")) {
+            System.out.print("\nIngrese RUT: ");
+            String rut = sc.nextLine().trim();
+            boolean encontrado = false;
+
+            for (int i = 0; i < cantAlumnos; i++) {
+                if (rut.equalsIgnoreCase(rutAlumnos[i])) {
+                    encontrado = true;
+                    if (!yaEstaAdmitido(rut)) {
+                        if (cantAdmitidos < nAdmitidos.length) {
+                            nAdmitidos[cantAdmitidos] = nombreAlumnos[i];
+                            apAdmitidos[cantAdmitidos] = apellidoAlumnos[i];
+                            rutAdmitidos[cantAdmitidos] = rut;
+                            parAdmitidos[cantAdmitidos] = paraleloAlumnos[i];
+                            cantAdmitidos++;
+                            System.out.println("Admitido manualmente.");
+                        } else {
+                            System.out.println("Limite de admitidos alcanzado. No hay espacio.");
+                        }
+                    } else {
+                        System.out.println("Ya estaba en el grupo.");
+                    }
+                    break;
+                }
+            }
+            if (!encontrado) {
+                System.out.println("El RUT " + rut + " no pertenece a ningun paralelo del curso.");
+                if (cantRechazados < lineaRechazados.length) {
+                    lineaRechazados[cantRechazados] = "Sin nombre registrado, RUT: " + rut;
+                    cantRechazados++;
+                }
+            }
+        }
+        // a
+    }
 
 
 
@@ -116,10 +234,59 @@ public class Main {
 
 
 
-	private static void administracionCurso(Scanner sc) {
-		// TODO Auto-generated method stub
-		
-	}
+	public static void procesarSolicitudes() {
+        if (cantAlumnos == 0 && cantSolicitudes == 0) {
+            System.out.println("ERROR, Debe cargar los archivos primero.");
+            return;
+        }
+
+        System.out.println("Procesando solicitudes...");
+        int admitidosHoy = 0;
+        int rechazadosHoy = 0;
+
+        for (int i = 0; i < cantSolicitudes; i++) {
+            String nombreSolicitud = nombreSolicitudes[i];
+            String apellidoSolicitud = apellidoSolicitudes[i];
+            boolean encontrado = false;
+
+            
+            for (int j = 0; j < cantAlumnos; j++) {
+                
+                if (nombreSolicitud.equalsIgnoreCase(nombreAlumnos[j]) && apellidoSolicitud.equalsIgnoreCase(apellidoAlumnos[j])) {
+                    encontrado = true;
+                    
+                    
+                    if (!yaEstaAdmitido(rutAlumnos[j])) {
+                        
+                        if (cantAdmitidos < nAdmitidos.length) {
+                            nAdmitidos[cantAdmitidos] = nombreAlumnos[j];
+                            apAdmitidos[cantAdmitidos] = apellidoAlumnos[j];
+                            rutAdmitidos[cantAdmitidos] = rutAlumnos[j];
+                            parAdmitidos[cantAdmitidos] = paraleloAlumnos[j];
+                            cantAdmitidos++;
+                            admitidosHoy++;
+                            System.out.println( nombreSolicitud + " " + apellidoSolicitud + " -> admitido en " + paraleloAlumnos[j]);
+                        } else {
+                            System.out.println("Limite de admitidos alcanzado. No hay espacio en memoria.");
+                        }
+                    }
+                    break; 
+                }
+            }
+
+            if (!encontrado) {
+                
+                if (cantRechazados < lineaRechazados.length) {
+                    lineaRechazados[cantRechazados] = nombreSolicitud + " " + apellidoSolicitud + " - No pertenece a ningun paralelo del curso";
+                    cantRechazados++;
+                    rechazadosHoy++;
+                    System.out.println(  nombreSolicitud + " " + apellidoSolicitud + " -> no pertenece a ningun paralelo");
+                }
+            }
+        }
+        System.out.println("");
+        System.out.println("Resumen: " + admitidosHoy + " admitidos / " + rechazadosHoy + " rechazados.");
+    }
 
 
 
@@ -127,21 +294,14 @@ public class Main {
 
 
 
-	private static void inscripcionManual(Scanner sc) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-
-
-
-
-	private static void procesarSolicitudes() {
-		// TODO Auto-generated method stub
-		
-	}
+	public static boolean yaEstaAdmitido(String rut) {
+        for (int i = 0; i < cantAdmitidos; i++) {
+            if (rutAdmitidos[i].equalsIgnoreCase(rut)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
 
@@ -150,8 +310,62 @@ public class Main {
 
 
 	private static void cargarArchivos() {
-		// TODO Auto-generated method stub
+		 cantAlumnos = 0;
+		 cantSolicitudes = 0;
+		 
+		 try {
+			 File archAlumnos = new File("Alumnos.txt");
+			 Scanner lector = new Scanner(archAlumnos);
+			 	
+			 while (lector.hasNextLine() && cantAlumnos < nombreAlumnos.length) {
+				 String linea = lector.nextLine().strip();
+				 
+				 if (!linea.isEmpty()) {
+					 String[] partes = linea.split(";");
+					 
+					 if (partes.length == 4) {
+						 nombreAlumnos[cantAlumnos]= partes[0];
+						 apellidoAlumnos[cantAlumnos]= partes[1];
+						 rutAlumnos[cantAlumnos]= partes[2];
+						 paraleloAlumnos[cantAlumnos] = partes[3];
+						 cantAlumnos++;
+					 }
+				 }
+			 }
+			 lector.close();
+			 
+			 
+		 }
+		 
+		 catch (IOException e) {
+			 System.out.println("El archivo Alumnos.txt no existe o no se pudo leer.");
+		 }
 		
+		try {
+			File archSolicitudes = new File("Solicitudes.txt");
+			Scanner lector = new Scanner(archSolicitudes);
+			
+			while (lector.hasNextLine() && cantSolicitudes < nombreSolicitudes.length) {
+				String linea = lector.nextLine().strip();
+				if (!linea.isEmpty()) {
+					String[] partes = linea.split("-");
+					if (partes.length == 2) {
+						nombreSolicitudes[cantSolicitudes] = partes[0];
+						apellidoSolicitudes[cantSolicitudes] = partes[1];
+						cantSolicitudes++;
+						
+					}
+				}
+			}
+			lector.close();
+		}
+		catch (IOException e) {
+			System.out.println("El archivo Solicitudes.txt no existe o no se pudo leer.");
+		}
+		System.out.println("");
+		System.out.println("Archivos procesados.");
+        System.out.println("- " + cantAlumnos + " alumnos en la lista.");
+        System.out.println("- " + cantSolicitudes + " solicitudes de ingreso.");
 	}
 
 }
